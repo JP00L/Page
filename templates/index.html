@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir PDF</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="upload-form">
+        <h2>Subir PDF y Extraer Datos</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <!-- Inputs para reemplazar Cokies e ID_Base -->
+            <label for="Cokies">Cokies:</label>
+            <input type="text" id="Cokies" name="Cokies" required>
+
+            <label for="ID_Base">ID_Base:</label>
+            <input type="text" id="ID_Base" name="ID_Base" required>
+
+            <!-- Checkbox para procesamiento adicional -->
+            <label for="processData">Crear Excepcion</label>
+            <input type="checkbox" id="processData" name="processData">
+
+            <!-- Aceptar múltiples archivos PDF -->
+            <input type="file" name="pdf_files" accept="application/pdf" multiple required>
+
+
+
+            <button type="submit">Subir y Extraer</button>
+        </form>
+        <div id="output"></div>
+    </div>
+    
+    <script>
+        document.querySelector('#uploadForm').onsubmit = function(event) {
+            event.preventDefault();
+            
+            // Crear un objeto FormData para almacenar los archivos seleccionados y las variables
+            let formData = new FormData();
+            let files = document.querySelector('input[type="file"]').files;
+
+            // Agregar cada archivo al FormData
+            for (let i = 0; i < files.length; i++) {
+                formData.append('pdf_files', files[i]);
+            }
+
+            // Agregar los valores de Cokies e ID_Base
+            formData.append('Cokies', document.getElementById('Cokies').value);
+            formData.append('ID_Base', document.getElementById('ID_Base').value);
+
+            // Verificar si el checkbox está marcado y agregar su valor
+            let processDataChecked = document.getElementById('processData').checked;
+            formData.append('processData', processDataChecked ? 'true' : 'false');
+            
+            // Enviar los archivos y datos al servidor
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let output = document.getElementById('output');
+                output.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => console.error('Error:', error));
+        };
+    </script>
+</body>
+</html>
